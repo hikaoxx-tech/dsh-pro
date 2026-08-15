@@ -37,13 +37,23 @@
 
 **方式一：命令行安装（推荐）**
 
+Windows：
+
 ```powershell
 # 在插件源码目录下执行：
 .\install.ps1
 ```
 
+macOS / Linux：
+
+```bash
+# 在插件源码目录下执行（需要 bash；首次请先 chmod +x install.sh）：
+chmod +x install.sh
+./install.sh
+```
+
 脚本会把插件复制到扩展目录 `~/.vscode/extensions/local.dsh-pro-0.1.0`，
-然后在 VS Code 里按 `Ctrl+Shift+P` → **Reload Window** 重载窗口即可。
+然后在 VS Code 里按 `Ctrl+Shift+P`（macOS 为 `Cmd+Shift+P`）→ **Reload Window** 重载窗口即可。
 
 **方式二：打包成 VSIX**
 
@@ -123,7 +133,7 @@ code --install-extension dsh-pro-0.1.0.vsix
 
 ## 开源发布
 
-- 本仓库即插件完整源码（`out/` 为编译产物，无 TypeScript 源码），克隆后可直接 `.\install.ps1` 安装，或 `.\build.ps1` 打包 VSIX。
+- 本仓库即插件完整源码（`out/` 为编译产物，无 TypeScript 源码），克隆后可直接 `.\install.ps1`（Windows）或 `./install.sh`（macOS / Linux）安装，或 `.\build.ps1` 打包 VSIX。
 - 使用前提：本机已全局安装 dsh CLI（`npm i -g @deepseek-ai/dsh`）并配置好 DeepSeek API Key（`DEEPSEEK_API_KEY`）。
 - 版权：基于 [mingxi2077/dsh-harness-vscode](https://github.com/Mingxi2077/dsh-vscode) v0.5.0 定制，遵循 MIT 许可（见 LICENSE.txt）。
 - 发布到 VS Code Marketplace 时需把 `package.json` 的 `publisher` 从 `local` 改为你自己的 publisher 名；仅放 GitHub 则无需改动。

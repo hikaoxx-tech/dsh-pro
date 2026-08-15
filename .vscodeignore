@@ -1,0 +1,29 @@
+# DSH Pro 打包排除清单（vsce package / publish 时生效）
+# 只保留运行必需的文件：out/ media/ package.json README.md CHANGELOG.md LICENSE.txt
+
+# Git 与开发工具
+.git/**
+.gitignore
+.gitattributes
+tsconfig.json
+.vscode/**
+
+# 构建/发布/安装脚本（发布产物不需要）
+build.ps1
+publish.ps1
+install.ps1
+install.sh
+
+# 源码与中间产物
+src/**
+patch/**
+test/**
+node_modules/**
+*.ts
+*.map
+
+# 杂项
+*.log
+*.vsix
+*.bak
+package.json.bak

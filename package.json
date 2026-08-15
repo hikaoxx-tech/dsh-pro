@@ -322,7 +322,7 @@
 		}
 	},
 	"scripts": {
-		"vscode:prepublish": "npm run compile",
+		"vscode:prepublish": "node -e \"console.log('DSH Pro is a pure-JS build - no compile step needed')\"",
 		"compile": "tsc -p ./",
 		"watch": "tsc -watch -p ./",
 		"test": "npm run compile && node --test test/",

@@ -1,4 +1,4 @@
-# 发布 DSH Pro 到 VS Code Marketplace
+﻿# 发布 DSH Pro 到 VS Code Marketplace
 #
 # 前置（只做一次）：
 #   1) npm i -g @vscode/vsce
@@ -31,7 +31,8 @@ try {
     $json = Get-Content $pkg -Raw -Encoding UTF8
     $json = $json -replace '"publisher":\s*"[^"]*"', ('"publisher": "' + $Publisher + '"')
     $json = $json -replace '"version":\s*"[^"]*"', ('"version": "' + $Version + '"')
-    [System.IO.File]::WriteAllText($pkg, $json, (New-Object System.Text.UTF8Encoding($true)))
+    # 注意：必须写 UTF-8 无 BOM（Node/vsce 的 JSON.parse 不认 BOM）
+    [System.IO.File]::WriteAllText($pkg, $json, (New-Object System.Text.UTF8Encoding($false)))
     Write-Host "临时发布身份: $Publisher @ $Version" -ForegroundColor Cyan
 
     if ($PatchOnly) {

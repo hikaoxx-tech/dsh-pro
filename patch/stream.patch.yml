@@ -1,0 +1,9 @@
+# dsh-vscode 流式补丁：将会话事件日志写到独立根目录（sessions-vscode），
+# 使用明文 JSONL + 低落盘批次延迟，供扩展实时 tail 展示思维链 / 工具调用过程。
+# 通过 --patch 传入，不影响其它 profile；独立根目录避免与历史 zstd 日志冲突。
+# 注意：config 是整体替换，必须带上 root 字段。
+- id: session-persistence-jsonl
+  config:
+    root: !!js dshHomePath('sessions-vscode')
+    compression: none
+    writeBatchMaxDelayMs: 150

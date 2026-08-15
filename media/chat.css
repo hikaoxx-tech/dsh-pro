@@ -1,0 +1,846 @@
+:root {
+  --border: var(--vscode-panel-border, #333);
+  --bg: var(--vscode-editor-background, #1e1e1e);
+  --fg: var(--vscode-editor-foreground, #d4d4d4);
+  --muted: var(--vscode-descriptionForeground, #9d9d9d);
+  --accent: var(--vscode-button-background, #0e639c);
+  --accent-fg: var(--vscode-button-foreground, #ffffff);
+  --user-bubble: var(--vscode-editorWidget-background, #252526);
+  --assistant-bg: var(--vscode-editor-background, #1e1e1e);
+  --code-bg: var(--vscode-textCodeBlock-background, #161616);
+  --danger: var(--vscode-errorForeground, #f14c4c);
+  --radius: 8px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--vscode-font-family, "Segoe UI", sans-serif);
+  font-size: var(--vscode-font-size, 13px);
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative; /* 供「回到底部」按钮绝对定位 */
+}
+
+/* ---------- 回到底部按钮（DSH Pro：滚动回看历史时出现） ---------- */
+
+.jump-btn {
+  position: absolute;
+  right: 16px;
+  bottom: 215px;
+  z-index: 50;
+  background: var(--accent);
+  color: var(--accent-fg);
+  border: none;
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+}
+
+.jump-btn:hover {
+  opacity: 0.9;
+}
+
+/* ---------- 头部 ---------- */
+
+#header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  flex: none;
+  gap: 10px;
+}
+
+/* DSH Pro：顶部品牌栏（Claude Code 式）——鲸鱼图标 + 产品名，置于头部最左边 */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  min-width: 0;
+}
+
+.brand-logo {
+  display: inline-flex;
+  align-items: center;
+  line-height: 0;
+  flex: none;
+}
+
+/* 图标小且清晰：官方鲸鱼是矢量 SVG，任意尺寸都锐利 */
+.brand-logo svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+.brand-name {
+  font-weight: 700;
+  font-size: 13px;
+  white-space: nowrap;
+  color: var(--fg);
+}
+
+.session-info {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+  justify-content: flex-start;
+}
+
+#session-title {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#session-id {
+  font-size: 11px;
+  font-family: var(--vscode-editor-font-family, monospace);
+}
+
+.actions {
+  display: flex;
+  gap: 4px;
+  flex: none;
+}
+
+.icon-btn {
+  background: none;
+  border: 1px solid transparent;
+  color: var(--fg);
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.icon-btn:hover {
+  background: var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.2));
+}
+
+.icon-btn.active {
+  background: var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.35));
+  border-color: var(--accent);
+}
+
+/* ---------- 消息区 ---------- */
+
+#messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.msg {
+  display: flex;
+  flex-direction: column;
+  max-width: 92%;
+  animation: fadein 0.15s ease;
+}
+
+@keyframes fadein {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.msg.user {
+  align-self: flex-end;
+  background: var(--user-bubble);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.msg.assistant {
+  align-self: flex-start;
+  background: var(--assistant-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 12px;
+  width: 100%;
+}
+
+.msg.system {
+  align-self: center;
+  max-width: 100%;
+  font-size: 12px;
+  color: var(--muted);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 6px 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.msg-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.msg-role {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.msg-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 4px;
+}
+
+.msg-actions button {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 11px;
+  border-radius: 4px;
+  padding: 2px 8px;
+  cursor: pointer;
+}
+
+.msg-actions button:hover {
+  color: var(--fg);
+  border-color: var(--muted);
+}
+
+.msg-content {
+  line-height: 1.55;
+  word-break: break-word;
+}
+
+.msg-content > *:first-child {
+  margin-top: 0;
+}
+
+.msg-content > *:last-child {
+  margin-bottom: 0;
+}
+
+.msg-content h1,
+.msg-content h2,
+.msg-content h3,
+.msg-content h4 {
+  margin: 14px 0 6px;
+  line-height: 1.3;
+}
+
+.msg-content h1 {
+  font-size: 1.3em;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 4px;
+}
+
+.msg-content h2 {
+  font-size: 1.15em;
+}
+
+.msg-content h3,
+.msg-content h4 {
+  font-size: 1.05em;
+}
+
+.msg-content p {
+  margin: 6px 0;
+}
+
+.msg-content ul,
+.msg-content ol {
+  margin: 6px 0;
+  padding-left: 22px;
+}
+
+.msg-content li {
+  margin: 2px 0;
+}
+
+.msg-content blockquote {
+  margin: 6px 0;
+  padding: 2px 12px;
+  border-left: 3px solid var(--accent);
+  color: var(--muted);
+}
+
+.msg-content code {
+  font-family: var(--vscode-editor-font-family, Consolas, monospace);
+  font-size: 0.92em;
+  background: var(--code-bg);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+.msg-content pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 12px;
+  overflow-x: auto;
+  margin: 8px 0;
+}
+
+.msg-content pre code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  font-size: 0.9em;
+  white-space: pre;
+}
+
+.msg-content hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 10px 0;
+}
+
+.msg-content a {
+  color: var(--vscode-textLink-foreground, #3794ff);
+}
+
+.msg-content a.file-ref {
+  color: var(--vscode-textLink-foreground, #3794ff);
+  cursor: pointer;
+  text-decoration: underline dotted;
+  font-family: var(--vscode-editor-font-family, Consolas, monospace);
+  font-size: 0.92em;
+}
+
+.msg-content a.file-ref:hover {
+  text-decoration: underline;
+}
+
+/* 实时进度样式见 live.css */
+
+.msg-content .table-wrap {
+  overflow-x: auto;
+  margin: 8px 0;
+}
+
+.msg-content table {
+  border-collapse: collapse;
+  min-width: 100%;
+  font-size: 0.95em;
+}
+
+.msg-content th,
+.msg-content td {
+  border: 1px solid var(--border);
+  padding: 4px 10px;
+  vertical-align: top;
+  word-break: break-word;
+  white-space: normal;
+}
+
+.msg-content th {
+  background: var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.15));
+  font-weight: 600;
+}
+
+.typing {
+  color: var(--muted);
+  font-size: 12px;
+  animation: pulse 1.2s infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* ---------- 输入区（Claude Code 式：圆角输入卡片 + 底部按钮行） ---------- */
+
+#composer {
+  flex: none;
+  border-top: 1px solid var(--border);
+  padding: 8px 12px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+#context-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 2px 4px 2px 10px;
+  font-size: 11px;
+  max-width: 300px;
+}
+
+.chip span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chip button {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0 4px;
+  border-radius: 50%;
+}
+
+.chip button:hover {
+  color: var(--danger);
+}
+
+/* 输入卡片：圆角 + 边框 + 聚焦高亮（Claude Code 式） */
+#input-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--vscode-input-background, #3c3c3c);
+  border: 1px solid var(--vscode-input-border, var(--border));
+  border-radius: var(--radius);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+#input-card:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+#input {
+  width: 100%;
+  resize: vertical;
+  min-height: 44px;
+  max-height: 200px;
+  background: transparent;
+  color: var(--vscode-input-foreground, #cccccc);
+  border: none;
+  border-radius: var(--radius) var(--radius) 0 0;
+  padding: 8px 10px 4px;
+  font-family: inherit;
+  font-size: inherit;
+  outline: none;
+}
+
+/* 底部按钮行（Claude Code inputFooter 式） */
+#composer-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 6px 6px;
+  border-top: 0.5px solid var(--vscode-input-border, var(--border));
+}
+
+#status {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-left: 6px;
+}
+
+.spacer {
+  flex-grow: 1;
+}
+
+/* 底部小图标按钮（Claude Code footerButton 式） */
+.footer-btn {
+  appearance: none;
+  background: none;
+  border: none;
+  color: var(--muted);
+  border-radius: 5px;
+  width: 26px;
+  height: 26px;
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+
+.footer-btn:hover {
+  background: var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.2));
+  color: var(--fg);
+}
+
+/* 权限模式按钮（Claude Code 式 footer 按钮，颜色区分模式） */
+.perm-chip {
+  appearance: none;
+  background: none;
+  border: 1px solid transparent;
+  color: var(--muted);
+  border-radius: 5px;
+  padding: 2px 8px;
+  cursor: pointer;
+  font-size: 12px;
+  flex: none;
+  transition: all 0.15s ease;
+}
+
+.perm-chip:hover {
+  color: var(--fg);
+  background: var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.15));
+}
+
+.perm-chip.perm-read-only {
+  color: var(--vscode-charts-blue, #3794ff);
+}
+
+.perm-chip.perm-danger-full-access {
+  color: var(--danger);
+}
+
+/* 停止按钮（运行中显示，Claude Code stopIcon 式） */
+.stop-btn {
+  appearance: none;
+  background: none;
+  border: 1px solid var(--danger);
+  color: var(--danger);
+  border-radius: 5px;
+  width: 26px;
+  height: 26px;
+  cursor: pointer;
+  font-size: 11px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+
+.stop-btn:hover {
+  background: rgba(241, 76, 76, 0.12);
+}
+
+/* 发送按钮（Claude Code 式：小圆角图标按钮，颜色随权限模式变化） */
+.send-btn {
+  appearance: none;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  line-height: 1;
+  flex: none;
+  color: #ffffff;
+  background: var(--accent);
+  margin-left: 2px;
+  transition: filter 0.15s ease;
+}
+
+.send-btn[data-permission-mode="read-only"] {
+  background: var(--vscode-focusBorder, var(--accent));
+}
+
+.send-btn[data-permission-mode="danger-full-access"] {
+  background: var(--danger);
+}
+
+.send-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.send-btn:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+.send-btn:active:not(:disabled) {
+  filter: brightness(0.9);
+}
+
+.empty-hint {
+  align-self: center;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 40px;
+  max-width: 380px;
+  line-height: 1.7;
+}
+
+.empty-hint kbd {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 1px 5px;
+  font-family: inherit;
+  font-size: 0.9em;
+}
+
+/* ---------- 欢迎页（Claude Code 式） ---------- */
+
+.welcome {
+  align-self: center;
+  text-align: center;
+  margin-top: 48px;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.welcome-logo {
+  line-height: 1;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.35));
+}
+
+/* DSH Pro：欢迎页背景图标 = DeepSeek 官方鲸鱼标志（小一点、更清晰：矢量 SVG 按 64px 渲染） */
+.welcome-logo svg {
+  width: 64px;
+  height: auto;
+  display: block;
+}
+
+.welcome-title {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+/* DSH Pro：欢迎页标题下的小字欢迎语 */
+.welcome-tagline {
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: -4px;
+}
+
+.welcome-sub {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* 欢迎页按钮（Claude Code 式：主按钮 / 次要按钮） */
+.welcome-actions button.primary-btn {
+  background: var(--accent);
+  color: var(--accent-fg);
+  border: none;
+  border-radius: 4px;
+  padding: 8px 22px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.welcome-actions button.primary-btn:hover {
+  filter: brightness(1.1);
+}
+
+.welcome-actions button.ghost-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  border-radius: 4px;
+  padding: 8px 18px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.welcome-actions button.ghost-btn:hover {
+  color: var(--fg);
+  border-color: var(--muted);
+}
+
+.welcome-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.welcome-hints {
+  margin-top: 14px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 2;
+  text-align: left;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 16px;
+}
+
+.welcome-hints kbd {
+  background: var(--vscode-editor-background, #1e1e1e);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 1px 5px;
+  font-family: inherit;
+  font-size: 0.92em;
+  color: var(--fg);
+}
+
+/* ---------- 自动补全菜单（/ 命令、@ 引用） ---------- */
+
+.autocomplete-menu {
+  position: absolute;
+  z-index: 100;
+  left: 12px;
+  right: 12px;
+  bottom: 150px;
+  max-height: 260px;
+  overflow-y: auto;
+  background: var(--vscode-quickInput-background, #252526);
+  border: 1px solid var(--vscode-quickInput-border, var(--border));
+  border-radius: 6px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  padding: 4px;
+}
+
+.menu-item {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.menu-item.selected {
+  background: var(--vscode-quickInputList-focusBackground, #04395e);
+}
+
+.menu-item.selected .menu-item-label {
+  color: var(--vscode-quickInputList-focusForeground, #ffffff);
+}
+
+.menu-item-label {
+  font-weight: 600;
+  white-space: nowrap;
+  font-family: var(--vscode-editor-font-family, Consolas, monospace);
+  font-size: 12px;
+}
+
+.menu-item-desc {
+  color: var(--muted);
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 专注视图下的进度提示 */
+.live-focus-hint {
+  color: var(--muted);
+  font-size: 12px;
+  padding: 4px 0;
+}
+
+/* ---------- 修改的文件卡片（DSH Pro） ---------- */
+
+.msg.changes {
+  align-self: stretch;
+  width: 100%;
+  background: var(--code-bg);
+  border: 1px dashed var(--accent);
+  border-radius: var(--radius);
+  padding: 8px 12px;
+}
+
+.msg.changes .msg-header {
+  margin-bottom: 4px;
+}
+
+.msg.changes .msg-role {
+  color: var(--accent);
+}
+
+.changes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.change-row {
+  padding: 4px 6px;
+  border-radius: 4px;
+}
+
+.change-row:hover {
+  background: var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.12));
+}
+
+.change-row a.file-ref {
+  font-size: 12px;
+}
+
+.change-diff summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--muted);
+  user-select: none;
+  margin: 4px 0 2px;
+}
+
+.change-diff summary:hover {
+  color: var(--fg);
+}
+
+.diff-pre {
+  margin: 4px 0 0;
+  max-height: 220px;
+  overflow: auto;
+  font-size: 11px;
+  white-space: pre;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 6px 8px;
+}
+
+.change-note {
+  color: var(--muted);
+  font-size: 11px;
+}

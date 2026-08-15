@@ -1,0 +1,243 @@
+/* 实时进度面板（思维链 / 工具调用）样式 —— 独立文件以保持 chat.css 精简 */
+/* 依赖 chat.css 中 :root 定义的 CSS 变量 */
+
+.usage-bar {
+  font-size: 11px;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 10px;
+  background: var(--code-bg);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.live-feed {
+  border-style: dashed !important;
+}
+
+.live-header {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.live-reasoning {
+  margin: 4px 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  background: var(--code-bg);
+}
+
+.live-reasoning summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--muted);
+  user-select: none;
+}
+
+.live-reasoning pre {
+  margin: 6px 0 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 0.88em;
+  color: var(--muted);
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.live-text {
+  margin: 6px 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--fg);
+  opacity: 0.85;
+  font-size: 0.95em;
+}
+
+.live-tool {
+  margin: 6px 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  background: var(--code-bg);
+  font-size: 0.9em;
+}
+
+.live-tool.is-error {
+  border-color: var(--danger);
+}
+
+.live-tool-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.live-tool-name {
+  font-weight: 600;
+  font-family: var(--vscode-editor-font-family, Consolas, monospace);
+}
+
+.live-tool-status {
+  font-size: 11px;
+  color: var(--muted);
+  flex: none;
+}
+
+.live-tool code {
+  display: block;
+  margin-top: 4px;
+  white-space: pre-wrap;
+  word-break: break-all;
+  font-size: 0.85em;
+}
+
+.live-tool-result {
+  margin-top: 4px;
+  color: var(--muted);
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 0.85em;
+}
+
+/* DSH Pro：修改类工具的"目标文件"链接 + 内联 diff */
+.live-tool-file {
+  display: block;
+  margin-top: 4px;
+  font-family: var(--vscode-editor-font-family, Consolas, monospace);
+  font-size: 0.85em;
+  color: var(--vscode-textLink-foreground, #3794ff);
+  cursor: pointer;
+  text-decoration: underline dotted;
+  word-break: break-all;
+}
+
+.live-tool-file:hover {
+  text-decoration: underline;
+}
+
+.live-tool-diff summary {
+  cursor: pointer;
+  font-size: 11px;
+  color: var(--muted);
+  user-select: none;
+  margin-top: 4px;
+  padding: 2px 6px;
+}
+
+.live-tool-diff summary:hover {
+  color: var(--fg);
+}
+
+/* ---------- 绿/红高亮 diff（DSH Pro，Claude Code 式：新增绿、删除红） ---------- */
+
+.live-tool-diff {
+  margin-top: 4px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--vscode-editor-background, #1e1e1e);
+}
+
+.diff-view {
+  border-top: 1px solid var(--border);
+}
+
+.diff-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 6px;
+  border-bottom: 1px solid var(--border);
+  background: var(--code-bg);
+}
+
+.diff-chip {
+  font-family: var(--vscode-editor-font-family, Consolas, monospace);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 0 8px;
+  border-radius: 9px;
+  line-height: 16px;
+}
+
+.diff-chip.add {
+  color: #4ade80;
+  background: rgba(74, 222, 128, 0.14);
+}
+
+.diff-chip.del {
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.14);
+}
+
+.diff-body {
+  max-height: 240px;
+  overflow: auto;
+  padding: 3px 0;
+  font-family: var(--vscode-editor-font-family, Consolas, monospace);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.diff-line {
+  display: flex;
+  padding: 0 6px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.diff-line.add {
+  background: var(--vscode-diffEditor-insertedLineBackground, rgba(35, 134, 54, 0.28));
+}
+
+.diff-line.del {
+  background: var(--vscode-diffEditor-removedLineBackground, rgba(218, 54, 51, 0.28));
+}
+
+.diff-sign {
+  flex: none;
+  width: 16px;
+  text-align: center;
+  user-select: none;
+  color: var(--muted);
+}
+
+.diff-line.add .diff-sign {
+  color: #4ade80;
+  font-weight: 700;
+}
+
+.diff-line.del .diff-sign {
+  color: #f87171;
+  font-weight: 700;
+}
+
+.diff-text {
+  flex: 1;
+  padding-left: 4px;
+}
+
+.diff-gap {
+  padding: 2px 12px;
+  color: var(--muted);
+  font-size: 11px;
+  text-align: center;
+  user-select: none;
+}
+
+.live-tool-diff .diff-pre {
+  margin: 4px 0 0;
+  max-height: 200px;
+  overflow: auto;
+  font-size: 0.8em;
+  white-space: pre;
+  background: var(--vscode-editor-background, #1e1e1e);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 6px;
+}

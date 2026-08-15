@@ -1,0 +1,15 @@
+# 打包产物
+*.vsix
+*.tgz
+
+# 依赖与构建
+node_modules/
+
+# 日志与临时文件
+*.log
+*.tmp
+
+# 系统/编辑器
+.DS_Store
+Thumbs.db
+.vscode-test/

@@ -1,0 +1,329 @@
+{
+	"name": "dsh-pro",
+	"displayName": "DSH Pro（我的专属 DSH）",
+	"description": "基于 dsh-harness-vscode 定制的个人版：编辑器右上角一键打开对话（紧挨 Run Code）、启动自动回到上次对话界面并自动打开上次文件夹（无需手动打开文件夹，与 Claude Code 一致）、状态栏显示工作目录、运行中可一键取消。其余能力与官方版一致：实时思考链、长期记忆、/model 切换、代码应用到文件等。",
+	"version": "0.1.0",
+	"publisher": "local",
+	"license": "MIT",
+	"icon": "media/icon.png",
+	"engines": {
+		"vscode": "^1.86.0"
+	},
+	"categories": [
+		"Other",
+		"AI"
+	],
+	"keywords": [
+		"dsh",
+		"deepseek",
+		"ai",
+		"agent",
+		"assistant"
+	],
+	"main": "./out/extension.js",
+	"activationEvents": [
+		"onStartupFinished"
+	],
+	"contributes": {
+		"commands": [
+			{
+				"command": "dsh-pro.openChat",
+				"title": "打开对话",
+				"category": "DSH Pro",
+				"icon": "$(comment-discussion)"
+			},
+			{
+				"command": "dsh-pro.openChatFromTitle",
+				"title": "打开对话（含选中代码）",
+				"category": "DSH Pro",
+				"icon": "media/whale.svg"
+			},
+			{
+				"command": "dsh-pro.configureApiKey",
+				"title": "配置 API Key",
+				"category": "DSH Pro"
+			},
+			{
+				"command": "dsh-pro.checkEnvironment",
+				"title": "检查环境",
+				"category": "DSH Pro"
+			},
+			{
+				"command": "dsh-pro.selfTest",
+				"title": "兼容性自检（运行测试任务）",
+				"category": "DSH Pro"
+			},
+			{
+				"command": "dsh-pro.newSession",
+				"title": "新建会话",
+				"category": "DSH Pro"
+			},
+			{
+				"command": "dsh-pro.focusInput",
+				"title": "聚焦输入框",
+				"category": "DSH Pro"
+			},
+			{
+				"command": "dsh-pro.insertAtMention",
+				"title": "把当前文件作为 @引用 加入对话",
+				"category": "DSH Pro"
+			},
+			{
+				"command": "dsh-pro.toggleFocusView",
+				"title": "切换专注视图（隐藏工具调用细节）",
+				"category": "DSH Pro"
+			},
+			{
+				"command": "dsh-pro.togglePermissionMode",
+				"title": "切换权限模式",
+				"category": "DSH Pro"
+			},
+			{
+				"command": "dsh-pro.cancelRun",
+				"title": "取消当前任务",
+				"category": "DSH Pro"
+			},
+			{
+				"command": "dsh-pro.addSelection",
+				"title": "把选中代码加入上下文",
+				"category": "DSH Pro"
+			},
+			{
+				"command": "dsh-pro.addOpenFile",
+				"title": "把当前文件加入上下文",
+				"category": "DSH Pro"
+			},
+			{
+				"command": "dsh-pro.askAboutFile",
+				"title": "询问此文件",
+				"category": "DSH Pro"
+			},
+			{
+				"command": "dsh-pro.quickExplainFile",
+				"title": "解释当前文件",
+				"category": "DSH Pro"
+			},
+			{
+				"command": "dsh-pro.quickReviewChanges",
+				"title": "审查当前改动 (git diff)",
+				"category": "DSH Pro"
+			},
+			{
+				"command": "dsh-pro.quickWriteTests",
+				"title": "为当前文件写测试",
+				"category": "DSH Pro"
+			},
+			{
+				"command": "dsh-pro.openTerminal",
+				"title": "打开 dsh 终端",
+				"category": "DSH Pro"
+			},
+			{
+				"command": "dsh-pro.editMemory",
+				"title": "编辑项目记忆",
+				"category": "DSH Pro"
+			},
+			{
+				"command": "dsh-pro.showMemory",
+				"title": "查看项目记忆",
+				"category": "DSH Pro"
+			}
+		],
+		"keybindings": [
+			{
+				"command": "dsh-pro.openChatFromTitle",
+				"key": "ctrl+alt+d",
+				"when": "editorTextFocus"
+			},
+			{
+				"command": "dsh-pro.focusInput",
+				"key": "ctrl+escape",
+				"when": "activeWebviewPanelId == 'dsh-pro-chat'"
+			},
+			{
+				"command": "dsh-pro.toggleFocusView",
+				"key": "ctrl+alt+f",
+				"when": "activeWebviewPanelId == 'dsh-pro-chat'"
+			},
+			{
+				"command": "dsh-pro.insertAtMention",
+				"key": "alt+k",
+				"when": "editorTextFocus"
+			},
+			{
+				"command": "dsh-pro.newSession",
+				"key": "ctrl+n",
+				"when": "config.dsh-pro.enableNewConversationShortcut && activeWebviewPanelId == 'dsh-pro-chat'"
+			}
+		],
+		"menus": {
+			"editor/title": [
+				{
+					"command": "dsh-pro.openChatFromTitle",
+					"group": "navigation",
+					"when": "config.dsh-pro.showTitleButton"
+				},
+				{
+					"command": "dsh-pro.cancelRun",
+					"group": "navigation",
+					"when": "config.dsh-pro.showTitleButton && dshPro.running"
+				}
+			],
+			"explorer/context": [
+				{
+					"command": "dsh-pro.askAboutFile",
+					"group": "dsh@1"
+				}
+			],
+			"editor/context": [
+				{
+					"command": "dsh-pro.addSelection",
+					"group": "dsh@1"
+				}
+			]
+		},
+		"viewsContainers": {
+			"activitybar": [
+				{
+					"id": "dsh-pro-sidebar",
+					"title": "DSH Pro",
+					"icon": "media/icon.svg"
+				}
+			]
+		},
+		"views": {
+			"dsh-pro-sidebar": [
+				{
+					"id": "dsh-pro.status",
+					"name": "状态",
+					"type": "tree"
+				}
+			]
+		},
+		"configuration": {
+			"title": "DSH Pro",
+			"properties": {
+				"dsh-pro.cliPath": {
+					"type": "string",
+					"default": "",
+					"description": "dsh 可执行文件的绝对路径，或 @deepseek-ai/dsh 的 lib/bin.js 的绝对路径。留空则自动从 PATH 解析。"
+				},
+				"dsh-pro.extraArgs": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					},
+					"default": [],
+					"description": "附加到 dsh 启动命令的额外参数（在 --profile headless 之后追加，如 --patch <path>）。"
+				},
+				"dsh-pro.timeoutSeconds": {
+					"type": "number",
+					"default": 21600,
+					"minimum": 30,
+					"maximum": 21600,
+					"description": "单次任务的超时秒数（默认 6 小时，即 21600 秒），超时后自动取消。"
+				},
+				"dsh-pro.environment": {
+					"type": "object",
+					"additionalProperties": {
+						"type": "string"
+					},
+					"default": {},
+					"description": "传给 dsh 子进程的额外环境变量（如 API Key、ANTHROPIC_MODEL）。"
+				},
+				"dsh-pro.historyMessages": {
+					"type": "number",
+					"default": 20,
+					"minimum": 1,
+					"maximum": 100,
+					"description": "拼入任务文本的最近对话消息条数（用于延续上下文）。"
+				},
+				"dsh-pro.maxMessageChars": {
+					"type": "number",
+					"default": 8000,
+					"minimum": 500,
+					"maximum": 100000,
+					"description": "单条历史消息拼入任务文本的最大字符数。"
+				},
+				"dsh-pro.streamProgress": {
+					"type": "boolean",
+					"default": true,
+					"description": "实时展示思维链与工具调用过程（通过 tail DSH 会话事件日志实现；关闭后仅显示最终答复）。"
+				},
+				"dsh-pro.debugStreaming": {
+					"type": "boolean",
+					"default": false,
+					"description": "调试：在每次答复末尾追加流式诊断（是否找到会话日志、解析了多少事件）。"
+				},
+				"dsh-pro.permissionMode": {
+					"type": "string",
+					"enum": [
+						"read-only",
+						"workspace-write",
+						"danger-full-access"
+					],
+					"default": "workspace-write",
+					"description": "传给 dsh 的沙箱权限模式（DSH_PERMISSION_MODE）。read-only 只读；workspace-write 可读写工作区内文件；danger-full-access 完全不受限且审批自动放行（仅在你完全信任 dsh 与任务时使用）。"
+				},
+				"dsh-pro.showTitleButton": {
+					"type": "boolean",
+					"default": true,
+					"description": "在编辑器右上角（Run Code 旁边）显示 DSH 对话按钮。"
+				},
+				"dsh-pro.restorePanelOnStartup": {
+					"type": "boolean",
+					"default": true,
+					"description": "VS Code 启动后自动打开 DSH Pro 对话面板，并停留在上次的对话界面（与 Claude Code 一致）。设为 false 可关闭自动打开。"
+				},
+				"dsh-pro.rememberLastFolder": {
+					"type": "boolean",
+					"default": true,
+					"description": "记住最近使用的工作目录（存入 VS Code 全局状态）：供启动时自动回到上次对话目录、自动打开上次文件夹使用。设为 false 则不记录，退回 fallbackFolder/主目录兜底。"
+				},
+				"dsh-pro.autoOpenFolder": {
+					"type": "boolean",
+					"default": true,
+					"description": "VS Code 启动且未打开任何文件夹时，自动把上次对话所在目录作为工作区打开（左侧资源管理器直接显示文件夹，与 Claude Code 一致）。设为 false 则只恢复对话面板、不自动打开文件夹。"
+				},
+				"dsh-pro.fallbackFolder": {
+					"type": "string",
+					"default": "",
+					"description": "未打开任何文件夹时的兜底工作目录。留空默认使用用户主目录（如 C:\\Users\\Administrator）。注意：兜底目录会作为 dsh 的文件读写沙箱边界，建议指向你的常用代码目录。"
+				},
+				"dsh-pro.useCtrlEnterToSend": {
+					"type": "boolean",
+					"default": false,
+					"description": "使用 Ctrl+Enter 发送消息（Enter 用于换行），与 Claude Code 的 useCtrlEnterToSend 一致。"
+				},
+				"dsh-pro.enableNewConversationShortcut": {
+					"type": "boolean",
+					"default": false,
+					"description": "当聊天面板聚焦时，用 Ctrl+N 快捷键新建会话（与 Claude Code 的 enableNewConversationShortcut 一致）。"
+				},
+				"dsh-pro.focusView": {
+					"type": "boolean",
+					"default": false,
+					"description": "专注视图：隐藏思考过程与工具调用细节，只显示你的提问与 DSH 的回答（可随时用 Ctrl+Alt+F 或面板内的眼睛按钮切换）。"
+				},
+				"dsh-pro.disablePreviewTabs": {
+					"type": "boolean",
+					"default": true,
+					"description": "关闭 VS Code 的预览标签行为（自动把 workbench.editor.enablePreview 设为 false，全局生效）：在左侧资源管理器里连续点击多个文件时，每个文件各占一个标签并存，不会互相顶掉（与聊天里点击文件的行为一致）。设为 false 则保持 VS Code 默认的预览标签行为。"
+				}
+			}
+		}
+	},
+	"scripts": {
+		"vscode:prepublish": "npm run compile",
+		"compile": "tsc -p ./",
+		"watch": "tsc -watch -p ./",
+		"test": "npm run compile && node --test test/",
+		"package": "vsce package"
+	},
+	"devDependencies": {
+		"@types/node": "^20.11.0",
+		"@types/vscode": "^1.85.0",
+		"@vscode/vsce": "^3.9.2",
+		"typescript": "^5.4.0"
+	}
+}

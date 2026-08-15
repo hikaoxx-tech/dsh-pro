@@ -95,7 +95,7 @@ code --install-extension dsh-pro-0.1.0.vsix
 
 | 方式 | 作用范围 | 怎么改 |
 | --- | --- | --- |
-| `agent-default-model`（settings.yaml） | 全局默认 | 编辑 `~/.dsh/settings.yaml`：`provider: deepseek-official`（内置），`model: deepseek-v4-flash`（可换 `deepseek-chat` / `deepseek-reasoner` 等），可选 `reasoningEffort: off/low/medium/high/max`；支持 `#` 注释 |
+| `agent-default-model`（settings.yaml） | 全局默认 | 编辑 `~/.dsh/settings.yaml`：`provider: deepseek-official`（内置），`model: deepseek-v4-flash`（可换 `deepseek-v4-pro`，`deepseek-chat` / `deepseek-reasoner` 已于 2026-07 被官方退役、调用会报错），可选 `reasoningEffort: off/low/medium/high/max`；支持 `#` 注释 |
 | `/model` `/provider` `/effort`（对话面板） | 当前文件夹（最优先） | 在对话面板直接输入斜杠命令选择，按文件夹记忆；会覆盖全局默认 |
 | `llm-pi-ai.providers`（settings.yaml） | 自定义提供商 | 在 settings.yaml 登记 OpenAI 兼容提供商（`displayName` / `apiKeyEnv` / `models`），再把 `agent-default-model` 指向它 |
 | API Key | — | 命令面板「DSH Pro: 配置 API Key」，或系统环境变量 `DEEPSEEK_API_KEY`；第三方提供商用各自的 `apiKeyEnv` 变量名 |
@@ -136,7 +136,12 @@ code --install-extension dsh-pro-0.1.0.vsix
 - 本仓库即插件完整源码（`out/` 为编译产物，无 TypeScript 源码），克隆后可直接 `.\install.ps1`（Windows）或 `./install.sh`（macOS / Linux）安装，或 `.\build.ps1` 打包 VSIX。
 - 使用前提：本机已全局安装 dsh CLI（`npm i -g @deepseek-ai/dsh`）并配置好 DeepSeek API Key（`DEEPSEEK_API_KEY`）。
 - 版权：基于 [mingxi2077/dsh-harness-vscode](https://github.com/Mingxi2077/dsh-vscode) v0.5.0 定制，遵循 MIT 许可（见 LICENSE.txt）。
-- 发布到 VS Code Marketplace 时需把 `package.json` 的 `publisher` 从 `local` 改为你自己的 publisher 名；仅放 GitHub 则无需改动。
+- **发布到 VS Code Marketplace**（让网友在扩展市场直接搜到安装）：
+  1. 用微软账号登录 [marketplace.visualstudio.com/manage](https://marketplace.visualstudio.com/manage) → 创建 Publisher（名字要唯一，如 `hikaoxx-tech`）；
+  2. 本机装发布工具：`npm i -g @vscode/vsce`；
+  3. 登录发布身份：`vsce login <你的Publisher名>`（输入 PAT，Scope 勾 `Marketplace > Manage`）；
+  4. 一键发布：`.\publish.ps1`（自动把 `publisher` 临时替换为发布者名并 `vsce publish`，完成后恢复为 `local`，本地开发安装不受影响）。只预览产物用 `.\publish.ps1 -PatchOnly`。
+- 仅放 GitHub 不上市场则无需任何改动（`publisher: local` 即可）。
 
 ## 更新
 

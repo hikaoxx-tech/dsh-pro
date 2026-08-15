@@ -59,7 +59,9 @@ exports.DEEPSEEK_PROVIDER = {
     displayName: "DeepSeek 官方（内置）",
     apiKeyEnv: "DEEPSEEK_API_KEY",
 };
-exports.DEEPSEEK_MODELS = ["deepseek-chat", "deepseek-reasoner", "deepseek-v4-flash"];
+// DSH Pro：2026-07-24 起 deepseek-chat / deepseek-reasoner 已被 DeepSeek 官方退役（调用直接报错），
+// 当前官方 API 仅 deepseek-v4-flash（轻量快速）与 deepseek-v4-pro（满血最强）两个模型。
+exports.DEEPSEEK_MODELS = ["deepseek-v4-flash", "deepseek-v4-pro"];
 exports.REASONING_EFFORTS = ["off", "low", "medium", "high", "max"];
 function defaultSettingsPath() {
     return path.join(os.homedir(), ".dsh", "settings.yaml");

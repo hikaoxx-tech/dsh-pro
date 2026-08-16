@@ -45,9 +45,14 @@ function buildTaskText(folderPath, session, contextBlocks, memory, historyMessag
         }
     }
     // 最新用户消息（从后往前找最后一条 user 消息，避免把修改记录卡片当成用户消息）
+    // DSH Pro：与历史消息一致地截断，防止用户粘贴超大内容时把整条命令行撑爆（spawn ENAMETOOLONG）
     const lastUser = [...session.messages].reverse().find((m) => m.role === "user");
+    let lastContent = lastUser ? lastUser.content : "";
+    if (lastContent.length > maxMessageChars) {
+        lastContent = lastContent.slice(0, maxMessageChars) + "\n…(内容已截断)";
+    }
     lines.push("--- 最新用户消息 ---");
-    lines.push(lastUser ? lastUser.content : "");
+    lines.push(lastContent);
     return lines.join("\n");
 }
 //# sourceMappingURL=taskText.js.map

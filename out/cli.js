@@ -162,9 +162,30 @@ function runCliVersion(cli) {
         });
     });
 }
+// DSH Pro：Windows 命令行总长上限 32767 字符（CreateProcess），超出即 spawn ENAMETOOLONG。
+// 任务文本是最后一个参数且可能极长（用户粘贴大段内容 / @dsh-agent 引用大文件 / 历史累积），
+// 这里统一做总长度保护：超限则截断任务文本并加标记，避免整条任务直接崩溃。
+const WIN_CMD_LINE_LIMIT = 26000; // 留足余量给可执行路径、引号、空格与特殊字符转义
+function clampCommandLine(args, executable) {
+    if (process.platform !== "win32" || args.length === 0)
+        return args;
+    // 每个参数按「引号 2 + 空格 1 + 转义余量 1」估算开销
+    const overhead = (executable ? executable.length + 1 : 0) + args.length * 4;
+    const used = overhead + args.reduce((sum, a) => sum + a.length, 0);
+    if (used <= WIN_CMD_LINE_LIMIT)
+        return args;
+    const taskIdx = args.length - 1; // 任务文本恒为最后一个参数
+    const others = overhead + args.reduce((sum, a, i) => sum + (i === taskIdx ? 0 : a.length), 0);
+    const marker = "\n…(任务内容过长，已截断)";
+    const keep = Math.max(0, WIN_CMD_LINE_LIMIT - others - marker.length);
+    args[taskIdx] = args[taskIdx].slice(0, keep) + marker;
+    return args;
+}
 /** 运行一次 dsh headless 任务，收集 stdout/stderr，直到进程退出、超时或被取消。 */
 function runDsh(cli, args, options) {
     return new Promise((resolve) => {
+        // DSH Pro：spawn 前做命令行总长度保护（Windows ENAMETOOLONG 防御）
+        args = clampCommandLine(args, cli.kind === "entry" ? cli.node : cli.command);
         // 防御：参数里绝不能包含可执行文件自身（否则 node 会把 exe 当脚本解析）
         if (cli.kind === "entry" && (args[0] === cli.node || args[0] === cli.entry)) {
             resolve({

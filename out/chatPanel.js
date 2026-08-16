@@ -89,6 +89,10 @@ class ChatPanel {
     busy = false;
     abort;
     disposables = [];
+    // DSH Pro：面板已销毁标记（onDidDispose 触发 dispose 时置位）。
+    // 异步回调（任务执行中 / 流式 tracer / 命令复用旧引用）可能晚于销毁到达，
+    // 所有触碰 webview 的方法先查此标记，杜绝「Webview is disposed」抛错。
+    disposed = false;
     constructor(context, folder, cliProvider, envProvider, secrets, status, log) {
         this.cliProvider = cliProvider;
         this.envProvider = envProvider;
@@ -140,10 +144,35 @@ class ChatPanel {
         return ChatPanel.instance;
     }
     panelVisible() {
-        return this.panel.visible;
+        if (this.disposed)
+            return false;
+        try {
+            return this.panel.visible;
+        }
+        catch {
+            return false;
+        }
     }
     reveal() {
-        this.panel.reveal(vscode.ViewColumn.Beside, true);
+        if (this.disposed)
+            return;
+        try {
+            this.panel.reveal(vscode.ViewColumn.Beside, true);
+        }
+        catch {
+            // 面板已销毁：忽略（防御：disposed 标记晚于 VS Code 内部销毁时兜底）
+        }
+    }
+    /** DSH Pro：安全设置面板标题（面板已销毁时静默忽略，避免 Webview is disposed）。 */
+    setPanelTitle(title) {
+        if (this.disposed)
+            return;
+        try {
+            this.panel.title = `DeepSeek Harness — ${title}`;
+        }
+        catch {
+            // 面板已销毁：忽略
+        }
     }
     // ---------------------------------------------------------------- 会话管理
     createFreshSession() {
@@ -164,7 +193,7 @@ class ChatPanel {
             const loaded = this.store.load(list[0].id);
             if (loaded && Array.isArray(loaded.messages)) {
                 this.session = loaded;
-                this.panel.title = `DeepSeek Harness — ${loaded.title || "历史会话"}`;
+                this.setPanelTitle(loaded.title || "历史会话");
             }
         }
         catch {
@@ -212,7 +241,7 @@ class ChatPanel {
         this.post({ type: "sessionChanged", sessionId: this.session.id, title: this.session.title });
         this.post({ type: "resetMessages" });
         this.post({ type: "appendMessages", messages: loaded.messages });
-        this.panel.title = `DeepSeek Harness — ${loaded.title}`;
+        this.setPanelTitle(loaded.title);
     }
     async listSessions() {
         const summaries = this.store.list();
@@ -233,6 +262,8 @@ class ChatPanel {
     post(message) {
         // DSH Pro：面板隐藏（retainContextWhenHidden 保持 webview 存活）时也照常投递，
         // 保证用户切到别的文件后回来，进度/思维链没有断档。面板已销毁则静默忽略。
+        if (this.disposed)
+            return;
         try {
             void this.panel.webview.postMessage(message);
         }
@@ -390,7 +421,7 @@ class ChatPanel {
             const title = firstUser.content.replace(/\s+/g, " ").trim().slice(0, 40);
             this.session.title = title || "新会话";
         }
-        this.panel.title = `DeepSeek Harness — ${this.session.title}`;
+        this.setPanelTitle(this.session.title);
     }
     async sendMessage(text) {
         const trimmed = text.trim();
@@ -874,6 +905,9 @@ class ChatPanel {
         return undefined;
     }
     dispose() {
+        // DSH Pro：先置销毁标记，再中止任务、释放订阅——防止 onDidDispose 之后
+        // 仍可能有异步回调（流式 tracer / 正在运行的任务）触碰已销毁的 webview
+        this.disposed = true;
         this.abort?.abort();
         for (const d of this.disposables) {
             d.dispose();

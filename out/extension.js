@@ -335,7 +335,6 @@ function activate(context) {
             clearAutoOpenPending();
         }
     }));
-    let panel;
     // @dsh-agent 聊天参与者（内置 Chat 中 @ 唤起）
     context.subscriptions.push((0, chatParticipant_1.registerChatParticipant)(context, cliProvider, envProvider, log));
     // 活动栏侧边栏状态视图
@@ -344,7 +343,7 @@ function activate(context) {
         const folder = await pickFolder();
         if (!folder)
             return;
-        panel = chatPanel_1.ChatPanel.open(context, folder, cliProvider, envProvider, secrets, status, log);
+        chatPanel_1.ChatPanel.open(context, folder, cliProvider, envProvider, secrets, status, log);
         status.setReady(true, "DSH Pro: 打开对话面板");
     }), 
     // DSH Pro：启动恢复用——静默选择工作目录（多根工作区不弹选择框）打开面板，停留在上次对话界面
@@ -364,20 +363,19 @@ function activate(context) {
             folder = fallbackFolder();
         }
         rememberLastFolder(folder.uri.fsPath);
-        panel = chatPanel_1.ChatPanel.open(context, folder, cliProvider, envProvider, secrets, status, log);
+        chatPanel_1.ChatPanel.open(context, folder, cliProvider, envProvider, secrets, status, log);
         status.setReady(true, "DSH Pro: 打开对话面板");
     }), 
     // 右上角标题栏按钮：打开（或复用）对话面板；编辑器有选区时自动加入上下文，并聚焦输入框
     vscode.commands.registerCommand("dsh-pro.openChatFromTitle", async () => {
         const editor = vscode.window.activeTextEditor;
         const hasSelection = !!editor && !editor.selection.isEmpty;
-        let current = panel ?? chatPanel_1.ChatPanel.current();
+        let current = chatPanel_1.ChatPanel.current();
         if (!current) {
             const folder = await pickFolder();
             if (!folder)
                 return;
             current = chatPanel_1.ChatPanel.open(context, folder, cliProvider, envProvider, secrets, status, log);
-            panel = current;
         }
         if (hasSelection) {
             current.attachSelection();
@@ -451,8 +449,8 @@ function activate(context) {
             output.appendLine(`检查失败: ${message}`);
             output.appendLine("");
             output.appendLine("请确认：");
-            output.appendLine("  1. 已全局安装 dsh：npm i -g @deepseek-ai/dsh");
-            output.appendLine("  2. dsh 在 PATH 中（新开一个终端执行 dsh --version 验证）");
+            output.appendLine("  1. 已全局安装 dsh：npm i -g @deepseek-ai/dsh（需先安装 Node.js：https://nodejs.org）");
+            output.appendLine("  2. dsh 在 PATH 中（新开一个终端执行 dsh --version 验证；安装后请完全退出并重启 VS Code，PATH 才会生效）");
             output.appendLine("  3. 或在本扩展设置 dsh-pro.cliPath 中指定 dsh 路径");
             output.show(true);
             status.setReady(false, "DSH: 环境异常，运行「DSH: 检查环境」查看详情");
@@ -475,7 +473,7 @@ function activate(context) {
             const sessionsDir = path.join(env.DSH_HOME || path.join(os.homedir(), ".dsh"), "sessions-vscode");
             const before = new Set(walkFiles(sessionsDir).filter((f) => f.endsWith("session.jsonl")));
             const extraArgs = ["--patch", streamPatch];
-            const sel = panel ? panel.selection : undefined;
+            const sel = chatPanel_1.ChatPanel.current()?.selection;
             const modelPatch = sel ? (0, modelSelection_1.writeModelPatch)(context.globalStorageUri.fsPath, (0, sessionStore_1.stableHash)(folder.uri.fsPath), sel) : undefined;
             if (modelPatch)
                 extraArgs.push("--patch", modelPatch);
@@ -517,25 +515,23 @@ function activate(context) {
             void vscode.window.showErrorMessage(`DSH 兼容性自检异常：${message}`);
         }
     }), vscode.commands.registerCommand("dsh-pro.newSession", async () => {
-        let current = panel ?? chatPanel_1.ChatPanel.current();
+        let current = chatPanel_1.ChatPanel.current();
         if (!current) {
             const folder = await pickFolder();
             if (!folder)
                 return;
             current = chatPanel_1.ChatPanel.open(context, folder, cliProvider, envProvider, secrets, status, log);
-            panel = current;
         }
         current.newSession();
     }), 
     // Claude Code 式：Ctrl+Escape 聚焦输入框（面板已打开时直接聚焦，未打开则打开）
     vscode.commands.registerCommand("dsh-pro.focusInput", async () => {
-        let current = panel ?? chatPanel_1.ChatPanel.current();
+        let current = chatPanel_1.ChatPanel.current();
         if (!current) {
             const folder = await pickFolder();
             if (!folder)
                 return;
             current = chatPanel_1.ChatPanel.open(context, folder, cliProvider, envProvider, secrets, status, log);
-            panel = current;
         }
         current.reveal();
         // 空字符串 setDraft 只聚焦输入框、不填内容
@@ -549,13 +545,12 @@ function activate(context) {
             void vscode.window.showInformationMessage("没有打开的文件可引用。");
             return;
         }
-        let current = panel ?? chatPanel_1.ChatPanel.current();
+        let current = chatPanel_1.ChatPanel.current();
         if (!current) {
             const folder = await pickFolder();
             if (!folder)
                 return;
             current = chatPanel_1.ChatPanel.open(context, folder, cliProvider, envProvider, secrets, status, log);
-            panel = current;
         }
         if (!current.folderPath || !doc.uri.fsPath.startsWith(current.folderPath)) {
             // 文件不在当前工作目录内时直接给出相对路径引用，不做上下文附加
@@ -573,37 +568,35 @@ function activate(context) {
         const cfg = vscode.workspace.getConfiguration("dsh-pro");
         const next = !cfg.get("focusView", false);
         void cfg.update("focusView", next, vscode.ConfigurationTarget.Global);
-        const current = panel ?? chatPanel_1.ChatPanel.current();
+        const current = chatPanel_1.ChatPanel.current();
         current?.post({ type: "focusViewChanged", enabled: next });
         void vscode.window.setStatusBarMessage(next ? "DSH Pro：专注视图已开启（隐藏工具细节）" : "DSH Pro：专注视图已关闭", 3000);
     }), 
     // Claude Code 式：循环切换权限模式（default → plan → bypass）
     vscode.commands.registerCommand("dsh-pro.togglePermissionMode", async () => {
-        const current = panel ?? chatPanel_1.ChatPanel.current();
+        const current = chatPanel_1.ChatPanel.current();
         if (current) {
             await current.togglePermissionMode();
         }
     }), vscode.commands.registerCommand("dsh-pro.cancelRun", () => {
-        const current = panel ?? chatPanel_1.ChatPanel.current();
+        const current = chatPanel_1.ChatPanel.current();
         current?.cancel();
     }), vscode.commands.registerCommand("dsh-pro.addSelection", async () => {
-        let current = panel ?? chatPanel_1.ChatPanel.current();
+        let current = chatPanel_1.ChatPanel.current();
         if (!current) {
             const folder = await pickFolder();
             if (!folder)
                 return;
             current = chatPanel_1.ChatPanel.open(context, folder, cliProvider, envProvider, secrets, status, log);
-            panel = current;
         }
         current.attachSelection();
     }), vscode.commands.registerCommand("dsh-pro.addOpenFile", async () => {
-        let current = panel ?? chatPanel_1.ChatPanel.current();
+        let current = chatPanel_1.ChatPanel.current();
         if (!current) {
             const folder = await pickFolder();
             if (!folder)
                 return;
             current = chatPanel_1.ChatPanel.open(context, folder, cliProvider, envProvider, secrets, status, log);
-            panel = current;
         }
         current.attachOpenFile();
     }), vscode.commands.registerCommand("dsh-pro.askAboutFile", async (uri) => {
@@ -611,7 +604,6 @@ function activate(context) {
         if (!folder)
             return;
         const chat = chatPanel_1.ChatPanel.open(context, folder, cliProvider, envProvider, secrets, status, log);
-        panel = chat;
         const target = uri ?? vscode.window.activeTextEditor?.document.uri;
         if (!target)
             return;
@@ -642,7 +634,6 @@ function activate(context) {
         if (!folder)
             return;
         const chat = chatPanel_1.ChatPanel.open(context, folder, cliProvider, envProvider, secrets, status, log);
-        panel = chat;
         const diff = await gitDiffSummary(folder.uri.fsPath);
         if (diff) {
             chat.addContextBlock({ kind: "file", label: "git diff（当前改动）", content: diff });
@@ -670,7 +661,7 @@ function activate(context) {
         // 用独立端口启动 dsh web，避免与已运行的实例冲突
         terminal.sendText("dsh web --port 3088");
     }), vscode.commands.registerCommand("dsh-pro.editMemory", async () => {
-        const current = panel ?? chatPanel_1.ChatPanel.current();
+        const current = chatPanel_1.ChatPanel.current();
         if (current) {
             await current.editMemory();
             return;
@@ -679,10 +670,9 @@ function activate(context) {
         if (!folder)
             return;
         const chat = chatPanel_1.ChatPanel.open(context, folder, cliProvider, envProvider, secrets, status, log);
-        panel = chat;
         await chat.editMemory();
     }), vscode.commands.registerCommand("dsh-pro.showMemory", async () => {
-        const current = panel ?? chatPanel_1.ChatPanel.current();
+        const current = chatPanel_1.ChatPanel.current();
         if (current) {
             current.showMemory();
             return;
@@ -691,7 +681,6 @@ function activate(context) {
         if (!folder)
             return;
         const chat = chatPanel_1.ChatPanel.open(context, folder, cliProvider, envProvider, secrets, status, log);
-        panel = chat;
         chat.showMemory();
     }));
     // DSH Pro：VS Code 启动后自动恢复对话面板（Claude Code 式：窗口打开即停留在上次对话界面）。

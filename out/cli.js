@@ -115,7 +115,7 @@ async function resolveCli(cliPath) {
             return { kind: "command", command: found, source: `PATH 解析(${found})` };
         }
     }
-    throw new Error("未找到 dsh 命令。请确认已全局安装 @deepseek-ai/dsh（npm i -g @deepseek-ai/dsh），或在设置中配置 dsh-pro.cliPath。");
+    throw new Error("未找到 dsh 命令。请确认已全局安装 @deepseek-ai/dsh（npm i -g @deepseek-ai/dsh；需先安装 Node.js：https://nodejs.org），或在设置中配置 dsh-pro.cliPath。");
 }
 /** 构造 spawn 参数（不含 node 本身，可执行文件由调用方单独传入）。
  * entry 模式附加 --expose-internals：DSH 的 HMR 服务在 node < 24 时必须带该 flag

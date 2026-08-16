@@ -65,11 +65,10 @@ Write-Host "`n[步骤 2/2] 打包版本 $Version（publisher=hikaoxx-tech）..."
 
 Push-Location $root
 try {
-    $publishArgs = @("-Version", $Version)
     if ($Publish) {
-        & (Join-Path $root "publish.ps1") @publishArgs
+        & (Join-Path $root "publish.ps1") -Version $Version
     } else {
-        & (Join-Path $root "publish.ps1") @publishArgs -PatchOnly
+        & (Join-Path $root "publish.ps1") -Version $Version -PatchOnly
     }
 }
 finally {

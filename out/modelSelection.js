@@ -134,6 +134,13 @@ function listModels(providerId, settingsPath = defaultSettingsPath()) {
         }
         if (indent === 4 && content && content !== "models:")
             break; // 下一个提供商或离开
+        // DSH Pro：兼容 pi-ai 官方 schema（`- id: xxx`）与旧写法（`- name: xxx`），
+        // 两种都收进 /model 列表，避免用户配了 GPT/Claude/千问后下拉是空的。
+        const im = content.match(/^- id:\s*(\S+)\s*$/);
+        if (im) {
+            models.push(im[1]);
+            continue;
+        }
         const nm = content.match(/^- name:\s*(\S+)\s*$/);
         if (nm)
             models.push(nm[1]);

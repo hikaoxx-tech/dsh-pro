@@ -97,10 +97,10 @@ code --install-extension dsh-pro-0.1.0.vsix
 | --- | --- | --- |
 | `agent-default-model`（settings.yaml） | 全局默认 | 编辑 `~/.dsh/settings.yaml`：`provider: deepseek-official`（内置），`model: deepseek-v4-flash`（可换 `deepseek-v4-pro`，`deepseek-chat` / `deepseek-reasoner` 已于 2026-07 被官方退役、调用会报错），可选 `reasoningEffort: off/low/medium/high/max`；支持 `#` 注释 |
 | `/model` `/provider` `/effort`（对话面板） | 当前文件夹（最优先） | 在对话面板直接输入斜杠命令选择，按文件夹记忆；会覆盖全局默认 |
-| `llm-pi-ai.providers`（settings.yaml） | 自定义提供商 | 在 settings.yaml 登记 OpenAI 兼容提供商（`displayName` / `apiKeyEnv` / `models`），再把 `agent-default-model` 指向它 |
-| API Key | — | 命令面板「DSH Pro: 配置 API Key」，或系统环境变量 `DEEPSEEK_API_KEY`；第三方提供商用各自的 `apiKeyEnv` 变量名 |
+| `llm-pi-ai.providers`（settings.yaml） | 自定义提供商 | 在 settings.yaml 登记其他 API 提供商（GPT / Claude / 千问 / 任意 OpenAI 兼容网关）：`displayName` / `apiKeyEnv` / `baseURL` / `api: openai-completions` / `models`（`- id: 模型名`），再把 `agent-default-model` 或 `/provider` 指向它。内置 catalog 提供商（openai、anthropic 等）只需 `apiKeyEnv`，不写 models 也能调用官方全部模型（`/model` 下拉为空时选「手动输入模型名」即可） |
+| API Key | — | 命令面板「DSH Pro: 配置 API Key」，或系统环境变量；第三方提供商用各自的 `apiKeyEnv` 变量名（如 `OPENAI_API_KEY`、`ANTHROPIC_API_KEY`、`DASHSCOPE_API_KEY`） |
 
-> 保存 settings.yaml 后**新建会话**即生效；`/model` 切换立即生效并记住。当前默认模型 = `deepseek-v4-flash`（DeepSeek 官方内置，与 dsh 出厂默认一致）。
+> 保存 settings.yaml 后**新建会话**即生效；`/model` 切换立即生效并记住。当前默认模型 = `deepseek-v4-flash`（DeepSeek 官方内置，与 dsh 出厂默认一致）。DSH 自带 pi-ai 多提供商适配器（默认休眠、配置即激活），`/model` 列表兼容 `- id:` 与 `- name:` 两种 models 写法。
 
 ## 快捷键
 

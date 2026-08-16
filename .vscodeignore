@@ -13,6 +13,7 @@ build.ps1
 publish.ps1
 install.ps1
 install.sh
+release.ps1
 
 # 源码与中间产物
 src/**
